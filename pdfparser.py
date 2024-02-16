@@ -1,12 +1,13 @@
 
 # !pip install camelot-py
+import os
 import sys
 import camelot
 import pandas as pd
 from time import time
 init = time()
-f_path = sys.argv[1]
-# f_path = './data/2015/AQI_Bulletin_20150815.pdf' # Example
+#f_path = sys.argv[1]
+f_path = os.getcwd() +'/data/2023/AQI_Bulletin_20230815.pdf' # Example
 
 tables = camelot.read_pdf(f_path, pages = "1-end")
 
@@ -48,7 +49,7 @@ def parse_pollutants(x):
         if f in x and s in x:
             polls.append(f+s)
             x = x.replace(f,'',1).replace(s,'',1)
-    with open(sys.argv[1].replace('.pdf','.log'), 'a') as fl:
+    with open(f_path.replace('.pdf','.log'), 'a') as fl:
         fl.write(x)
     return ', '.join(sorted(polls))
 
@@ -57,6 +58,6 @@ final_df = final_df.rename(columns={'Prominent Polluta nt':'Prominent Pollutant'
                                     'Based on number of stations':'Based on number of monitoring stations'}) # Handling Naming issues
 final_df['Prominent Pollutant'] = final_df['Prominent Pollutant'].apply(lambda x: parse_pollutants(x))
 
-save_path = sys.argv[1].replace('.pdf', '.csv')
+save_path = f_path.replace('.pdf', '.csv')
 # print('Saving to', save_path)
 final_df.to_csv(save_path, index=None)
