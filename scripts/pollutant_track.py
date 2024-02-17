@@ -24,4 +24,7 @@ for pollutant in pollutants:
     results.append(result)
 
 master = pd.concat(results)
-print(master)
+
+master = master.pivot_table(index=['Year', 'Month'], columns='pollutant', values='Count', fill_value=0).reset_index()
+
+master.to_csv('pollutants_monthly.csv', index=False)
