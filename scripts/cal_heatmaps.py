@@ -6,12 +6,16 @@ from matplotlib.cm import ScalarMappable
 import os
 import sys
 import numpy as np
+import warnings
+
+# Ignore all warnings
+warnings.filterwarnings("ignore")
 
 if len(sys.argv) !=2:
-    print("Usage: scirpts/cal_heatmaps.py city_name")
+    print("Usage: scripts/cal_heatmaps.py city_name")
     sys.exit(0)
 
-city = sys.argv[1].capitalize()
+city = sys.argv[1]
 from PIL import Image
 
 def join_images_vertically(image1_path, image2_path, output_path):
@@ -38,12 +42,17 @@ def join_images_vertically(image1_path, image2_path, output_path):
 df = pd.read_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master.csv')
 df = df[df['City']==city]
 
+print(df.head())
 df['date'] = pd.to_datetime(df['date'])
 
 ##
 df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).replace('(', ' '))
-df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).split(' ')[0] if '@' in str(x).lower() else str(x))
+df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).split(' ')[0])
+df.replace('', np.nan, inplace=True)
+df = df.dropna()
+
 df['No. Stations'] = df['No. Stations'].astype(float)
+
 result = df.groupby(df.date.dt.year)['No. Stations'].mean().reset_index()
 num_years = result.date.nunique()
 #print(result)
@@ -78,10 +87,10 @@ calplot.calplot(df['AQI'],
                 colorbar = False,
 
                 yearlabels = True,
-                yearlabel_kws = {'fontsize': 30, 'color': 'black'},
+                yearlabel_kws = {'fontsize': 30, 'color': 'black', 'fontname':'sans-serif'},
 
                 suptitle = city,
-                suptitle_kws = {'fontsize': 40, 'x': 0.5, 'y': 0.995, 'fontweight':'bold'},
+                suptitle_kws = {'fontsize': 40, 'x': 0.5, 'y': 0.995, 'fontweight':'bold', 'fontname':'sans-serif'},
                 
                 cmap=cmap,
 
@@ -119,4 +128,4 @@ plt.savefig(os.getcwd() + '/plots/{}_stations.png'.format(city))
 # Example usage:
 join_images_vertically(os.getcwd() + '/plots/{}_calendarhm.png'.format(city),
                        os.getcwd() + '/plots/{}_stations.png'.format(city),
-                       os.getcwd() + "/plots/{}_calendarhm_stations.png".format(city))
+                       os.getcwd() + "/plots/final/{}_calendarhm_stations.png".format(city))
