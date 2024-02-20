@@ -12,6 +12,29 @@ if len(sys.argv) !=2:
     sys.exit(0)
 
 city = sys.argv[1].capitalize()
+from PIL import Image
+
+def join_images_vertically(image1_path, image2_path, output_path):
+    # Open images
+    image1 = Image.open(image1_path)
+    image2 = Image.open(image2_path)
+    
+    # Determine the width and height of the output image
+    width = max(image1.width, image2.width)
+    height = image1.height + image2.height
+    
+    # Create a new blank image with the calculated dimensions
+    new_image = Image.new("RGB", (width, height))
+    
+    # Paste the first image at the top
+    new_image.paste(image1, (0, 0))
+    
+    # Paste the second image below the first one
+    new_image.paste(image2, (0, image1.height))
+    
+    # Save the result
+    new_image.save(output_path)
+
 df = pd.read_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master.csv')
 df = df[df['City']==city]
 
@@ -22,7 +45,8 @@ df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).replace('(', ' ')
 df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).split(' ')[0] if '@' in str(x).lower() else str(x))
 df['No. Stations'] = df['No. Stations'].astype(float)
 result = df.groupby(df.date.dt.year)['No. Stations'].mean().reset_index()
-print(result)
+num_years = result.date.nunique()
+#print(result)
 #df = df[df.date.dt.year == 2020]
 df.set_index('date', inplace=True)
 
@@ -49,15 +73,15 @@ categories = [1, 2, 3, 4, 5, 6]
 df['AQI'] = np.select(conditions, categories, default='outlier')
 df['AQI'] = df['AQI'].astype(int)
 
-fig, ax = calplot.calplot(df['AQI'],
+calplot.calplot(df['AQI'],
                 yearascending = True,
                 colorbar = False,
 
                 yearlabels = True,
-                yearlabel_kws = {'fontsize': 25, 'color': 'black'},
+                yearlabel_kws = {'fontsize': 30, 'color': 'black'},
 
                 suptitle = city,
-                suptitle_kws = {'fontsize': 30, 'x': 0.5, 'y': 1, 'fontweight':'bold'},
+                suptitle_kws = {'fontsize': 40, 'x': 0.5, 'y': 0.995, 'fontweight':'bold'},
                 
                 cmap=cmap,
 
@@ -66,11 +90,18 @@ fig, ax = calplot.calplot(df['AQI'],
 
                 #textformat = '{:.0f}', textfiller = '-', textcolor = 'black'
 
-                figsize=(20,30)
+                figsize=(20,num_years*3.67)
                 )
-plt.xticks(fontweight='bold', fontsize=25)
+# Iterate over each subplot and set xtick labels to bold
+for ax in plt.gcf().get_axes():
+    fontsize = 28
+    fontweight = 'bold'
+    fontproperties = {'weight' : fontweight, 'size' : fontsize}
+    ax.set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], fontdict = fontproperties)
+    #ax.tick_params(axis="x", labelsize=28, weight='bold')
+#plt.xticks(fontweight='bold', fontsize=28)
 
-plt.savefig('varanasi_calendarhm.png')
+plt.savefig(os.getcwd() + '/plots/{}_calendarhm.png'.format(city))
 plt.close()
 
 
@@ -78,32 +109,14 @@ plt.figure(figsize=(20,7))
 plt.bar(result.date, result['No. Stations'], )
 plt.title('Number of stations per day', fontsize=25, fontweight='bold')
 plt.xticks(result.date, fontweight='bold', fontsize=20)
+plt.yticks(fontweight='bold', fontsize=20)
+
 plt.xlabel('Year', fontsize=20)
-plt.savefig('varanasi_calendarhm2.png')
+plt.savefig(os.getcwd() + '/plots/{}_stations.png'.format(city))
 
 
-from PIL import Image
-
-def join_images_vertically(image1_path, image2_path, output_path):
-    # Open images
-    image1 = Image.open(image1_path)
-    image2 = Image.open(image2_path)
-    
-    # Determine the width and height of the output image
-    width = max(image1.width, image2.width)
-    height = image1.height + image2.height
-    
-    # Create a new blank image with the calculated dimensions
-    new_image = Image.new("RGB", (width, height))
-    
-    # Paste the first image at the top
-    new_image.paste(image1, (0, 0))
-    
-    # Paste the second image below the first one
-    new_image.paste(image2, (0, image1.height))
-    
-    # Save the result
-    new_image.save(output_path)
 
 # Example usage:
-join_images_vertically("varanasi_calendarhm.png", "varanasi_calendarhm2.png", "joined_image.png")
+join_images_vertically(os.getcwd() + '/plots/{}_calendarhm.png'.format(city),
+                       os.getcwd() + '/plots/{}_stations.png'.format(city),
+                       os.getcwd() + "/plots/{}_calendarhm_stations.png".format(city))
