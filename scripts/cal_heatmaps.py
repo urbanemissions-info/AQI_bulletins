@@ -41,8 +41,6 @@ def join_images_vertically(image1_path, image2_path, output_path):
 
 df = pd.read_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master.csv')
 df = df[df['City']==city]
-
-print(df.head())
 df['date'] = pd.to_datetime(df['date'])
 
 ##
@@ -82,6 +80,10 @@ categories = [1, 2, 3, 4, 5, 6]
 df['AQI'] = np.select(conditions, categories, default='outlier')
 df['AQI'] = df['AQI'].astype(int)
 
+if len(city) < 12:
+    title_font_size = 40
+else:
+    title_font_size = 35
 calplot.calplot(df['AQI'],
                 yearascending = True,
                 colorbar = False,
@@ -89,8 +91,8 @@ calplot.calplot(df['AQI'],
                 yearlabels = True,
                 yearlabel_kws = {'fontsize': 30, 'color': 'black', 'fontname':'sans-serif'},
 
-                suptitle = city,
-                suptitle_kws = {'fontsize': 40, 'x': 0.5, 'y': 0.995, 'fontweight':'bold', 'fontname':'sans-serif'},
+                suptitle = "AQI Reported in CPCB's Daily Bulletins for "+ city,
+                suptitle_kws = {'fontsize': title_font_size, 'x': 0.5, 'y': 0.995, 'fontweight':'bold', 'fontname':'sans-serif'},
                 
                 cmap=cmap,
 
@@ -114,18 +116,22 @@ plt.savefig(os.getcwd() + '/plots/{}_calendarhm.png'.format(city))
 plt.close()
 
 
-plt.figure(figsize=(20,7))  
+plt.figure(figsize=(20,8))  
 plt.bar(result.date, result['No. Stations'], )
-plt.title('Number of stations per day', fontsize=25, fontweight='bold')
-plt.xticks(result.date, fontweight='bold', fontsize=20)
-plt.yticks(fontweight='bold', fontsize=20)
+plt.title('Average number of stations reporting', fontsize=40, fontweight='bold')
+plt.xticks(result.date, fontweight='bold', fontsize=25)
+plt.yticks(fontweight='bold', fontsize=25)
 
-plt.xlabel('Year', fontsize=20)
+plt.xlabel('Year', fontsize=30)
 plt.savefig(os.getcwd() + '/plots/{}_stations.png'.format(city))
 
 
 
-# Example usage:
+# Join images:
+join_images_vertically(os.getcwd() + '/plots/{}_calendarhm.png'.format(city),
+                       os.getcwd() + '/assets/aqi_bands.png'.format(city),
+                       os.getcwd() + "/plots/{}_calendarhm.png".format(city))
+
 join_images_vertically(os.getcwd() + '/plots/{}_calendarhm.png'.format(city),
                        os.getcwd() + '/plots/{}_stations.png'.format(city),
                        os.getcwd() + "/plots/final/{}_calendarhm_stations.png".format(city))

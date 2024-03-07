@@ -3,7 +3,7 @@ import os
 import subprocess
 from tqdm import tqdm 
 import glob
-cities = pd.read_csv(os.getcwd() + '/data/Processed/CityCounts.csv')['City']
+cities = pd.read_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master.csv')['City'].unique()
 
 done = glob.glob(os.getcwd() + "/plots/final/*.png")
 done_cities = []
@@ -15,8 +15,8 @@ cities = [city for city in cities if city not in done_cities]
 
 print(cities)
 
-for city in tqdm(cities[1:]):
-    print(city)
-    print('*** ------------------------------------------- ***')
-    command = ["python", "scripts/cal_heatmaps.py", city]
-    subprocess.run(command)
+# for city in tqdm(cities[1:]):
+#     print(city)
+#     print('*** ------------------------------------------- ***')
+#     command = ["python", "scripts/cal_heatmaps.py", city]
+#     subprocess.run(command)

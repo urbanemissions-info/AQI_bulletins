@@ -37,6 +37,6 @@ master_df['No. Stations'] = master_df['No. Stations'].apply(lambda x: str(x).rep
 
 master_df = master_df[['date', 'City','No. Stations', 'Air Quality', 'Index Value', 'Prominent Pollutant']]
 master_df = master_df.sort_values(by='date')
-master_df.to_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master0.csv', index=False)
+master_df.to_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master_cleaned.csv', index=False)
 
 
