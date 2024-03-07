@@ -34,9 +34,24 @@ master_df['No. Stations'] = master_df['No. Stations'].replace('nan','', regex=Tr
 master_df['No. Stations'] = master_df['No. Stations'].apply(lambda x: str(x).split('/')[0])
 master_df['No. Stations'] = master_df['No. Stations'].apply(lambda x: str(x).replace('+', ''))
 
+# CLean City Column
+master_df['City'] = master_df['City'].apply(lambda x: str(x).replace('+', ''))
+master_df['City'] = master_df['City'].apply(lambda x: str(x).replace('#', ''))
+master_df['City'] = master_df['City'].apply(lambda x: str(x).replace('\n',''))
+master_df['City'] = master_df['City'].replace('Bangaluru', 'Bengaluru', regex=True)
+master_df['City'] = master_df['City'].replace('Ahmadabad', 'Ahmedabad', regex=True)
+master_df['City'] = master_df['City'].replace('Bangalore', 'Bengaluru', regex=True)
+master_df['City'] = master_df['City'].replace('Coimbtore', 'Coimbatore', regex=True)
+master_df['City'] = master_df['City'].replace('vellore', 'Vellore', regex=True)
+master_df['City'] = master_df['City'].replace('Tiruppur', 'Tirupur', regex=True)
+master_df['City'] = master_df['City'].replace('NOIDA', 'Noida', regex=True)
+master_df['City'] = master_df['City'].replace('Greater_Noida', 'Greater Noida', regex=True)
+master_df['City'] = master_df['City'].replace('Aurangabad', 'Aurangabad(Maharashtra)', regex=True)
+
+master_df['City'] = master_df['City'].apply(lambda x: str(x).strip())
 
 master_df = master_df[['date', 'City','No. Stations', 'Air Quality', 'Index Value', 'Prominent Pollutant']]
 master_df = master_df.sort_values(by='date')
-master_df.to_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master_cleaned.csv', index=False)
+master_df.to_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master0.csv', index=False)
 
 
