@@ -46,7 +46,7 @@ master_df['City'] = master_df['City'].replace('vellore', 'Vellore', regex=True)
 master_df['City'] = master_df['City'].replace('Tiruppur', 'Tirupur', regex=True)
 master_df['City'] = master_df['City'].replace('NOIDA', 'Noida', regex=True)
 master_df['City'] = master_df['City'].replace('Greater_Noida', 'Greater Noida', regex=True)
-master_df['City'] = master_df['City'].replace('Aurangabad', 'Aurangabad(Maharashtra)', regex=True)
+#master_df['City'] = master_df['City'].replace('Aurangabad', 'Aurangabad(Maharashtra)', regex=True) - this replaces aurangabad in aurangabad (bihar) as well
 
 master_df['City'] = master_df['City'].apply(lambda x: str(x).strip())
 

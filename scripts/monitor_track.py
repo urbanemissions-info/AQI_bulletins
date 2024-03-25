@@ -5,12 +5,13 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 df = pd.read_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master.csv')
-df['date'] = pd.to_datetime(df['date'])
-
 df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).replace('(', ' '))
 df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).split(' ')[0])
 df.replace('', np.nan, inplace=True)
 df = df.dropna()
+
+df['date'] = pd.to_datetime(df['date'])
+
 df['No. Stations'] = df['No. Stations'].astype(float)
 
 

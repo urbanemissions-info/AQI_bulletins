@@ -39,16 +39,20 @@ def join_images_vertically(image1_path, image2_path, output_path):
     # Save the result
     new_image.save(output_path)
 
+# Create a dataframe with a single column - dates from 2015 to 2023
+daily_dates = pd.date_range(start='2015-01-01', end='2023-12-31', freq='D')
+template = pd.DataFrame({'date': daily_dates})
+
 df = pd.read_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master.csv')
 df = df[df['City']==city]
 df['date'] = pd.to_datetime(df['date'])
+df = template.merge(df, on='date', how='left') #Remove this code if you dont want years without data in calendar
 
 ##
 df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).replace('(', ' '))
+df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).replace('!', ''))
 df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).split(' ')[0])
 df.replace('', np.nan, inplace=True)
-df = df.dropna()
-
 df['No. Stations'] = df['No. Stations'].astype(float)
 
 result = df.groupby(df.date.dt.year)['No. Stations'].mean().reset_index()
@@ -57,10 +61,14 @@ num_years = result.date.nunique()
 #df = df[df.date.dt.year == 2020]
 df.set_index('date', inplace=True)
 
+# Replace all NULLS with -1 (grey out on map)
+df = df.fillna(-1)
+
 ## CALENDAR HEATMAP
 # Define the colormap ranges and colors
 aqi_ranges = [0, 50, 100, 200, 300, 400, 500]
-aqi_colors = ['#00b050', '#669900', '#f2f542', '#f59042', '#ff0000', '#753b3b']
+aqi_colors = ['#eeeeeeff', # Null values are replaced with -1 - this color is for that - remove it if null calendary years are not needed
+              '#274e13ff', '#93c47dff', '#f2f542', '#f59042', '#ff0000', '#753b3b']
 
 # Create a custom discrete colormap for AQI
 cmap = ListedColormap(aqi_colors)
@@ -68,6 +76,7 @@ norsm = BoundaryNorm(aqi_ranges, cmap.N, clip=True)
 
 # Define the conditions for each category
 conditions = [
+    (df['Index Value'] < 0), # Null values are replaced with -1 - this category is for that - remove it if null calendary years are not needed
     (df['Index Value'] <= 50),
     (df['Index Value'] > 50) & (df['Index Value'] <= 100),
     (df['Index Value'] > 100) & (df['Index Value'] <= 200),
@@ -76,10 +85,11 @@ conditions = [
     (df['Index Value'] > 400)
 ]
 
-categories = [1, 2, 3, 4, 5, 6]
+categories = [1, 2, 3, 4, 5, 6, 7] #Should be 6 - +1 for the null value category.
 df['AQI'] = np.select(conditions, categories, default='outlier')
 df['AQI'] = df['AQI'].astype(int)
 
+df.to_csv('Pune.csv')
 if len(city) < 12:
     title_font_size = 40
 else:
@@ -112,26 +122,30 @@ for ax in plt.gcf().get_axes():
     #ax.tick_params(axis="x", labelsize=28, weight='bold')
 #plt.xticks(fontweight='bold', fontsize=28)
 
-plt.savefig(os.getcwd() + '/plots/{}_calendarhm.png'.format(city))
+plt.savefig(os.getcwd() + '/plots/calendarheats/{}_calendarhm.png'.format(city))
 plt.close()
 
+result = result.fillna(0)
 
 plt.figure(figsize=(20,8))  
 plt.bar(result.date, result['No. Stations'], )
 plt.title('Average number of stations reporting', fontsize=40, fontweight='bold')
 plt.xticks(result.date, fontweight='bold', fontsize=25)
-plt.yticks(fontweight='bold', fontsize=25)
+ytick_stepsize = round(max(result['No. Stations'].dropna())/5, 1)
+if ytick_stepsize>1:
+    ytick_stepsize = round(ytick_stepsize,0)
+plt.yticks(np.arange(ytick_stepsize, max(result['No. Stations'].dropna())+ytick_stepsize, ytick_stepsize), fontweight='bold', fontsize=25)
 
 plt.xlabel('Year', fontsize=30)
-plt.savefig(os.getcwd() + '/plots/{}_stations.png'.format(city))
+plt.savefig(os.getcwd() + '/plots/calendarheats/{}_stations.png'.format(city))
 
 
 
 # Join images:
-join_images_vertically(os.getcwd() + '/plots/{}_calendarhm.png'.format(city),
+join_images_vertically(os.getcwd() + '/plots/calendarheats/{}_calendarhm.png'.format(city),
                        os.getcwd() + '/assets/aqi_bands.png'.format(city),
-                       os.getcwd() + "/plots/{}_calendarhm.png".format(city))
+                       os.getcwd() + "/plots/calendarheats/{}_calendarhm.png".format(city))
 
-join_images_vertically(os.getcwd() + '/plots/{}_calendarhm.png'.format(city),
-                       os.getcwd() + '/plots/{}_stations.png'.format(city),
-                       os.getcwd() + "/plots/final/{}_calendarhm_stations.png".format(city))
+join_images_vertically(os.getcwd() + '/plots/calendarheats/{}_calendarhm.png'.format(city),
+                       os.getcwd() + '/plots/calendarheats/{}_stations.png'.format(city),
+                       os.getcwd() + "/plots/final_calendarheats/{}_calendarhm_stations.png".format(city))

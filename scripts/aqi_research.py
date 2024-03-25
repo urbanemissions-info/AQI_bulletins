@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 
-df = pd.read_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master0.csv')
+df = pd.read_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master.csv')
 df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).replace('(', ' '))
 df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).replace('!', ' '))
 df['No. Stations'] = df['No. Stations'].apply(lambda x: str(x).split(' ')[0])
@@ -106,7 +106,7 @@ plt.savefig(os.getcwd() + '/plots/Results/num_stations_per_month.png')
 plt.close()
 
 
-# 5. Average number of monitoring stations per city by year (I am assuming this is the same as point 3/ point 1)
+# 5. Average number of monitoring stations by year (I am assuming this is the same as point 3/ point 1)
 
 avg_by_year = num_stations_per_year.values[:,1]/unique_cities_per_year.values
 avg_by_year_df = pd.DataFrame([num_stations_per_year.values[:,0], avg_by_year]).T
@@ -126,6 +126,10 @@ plt.tight_layout()
 plt.legend().remove()
 plt.savefig(os.getcwd() + '/plots/Results/avg_numstations_by_year.png')
 plt.close()
+
+# 5a. Average number of monitoring stations per city by year
+avg_by_city_year_df = df.groupby(['City', 'year'])['No. Stations'].mean().reset_index()
+avg_by_city_year_df.to_csv(os.getcwd() + '/data/Results/avg_by_city_year_df.csv', index=False)
 
 # 6. Average number of monitoring stations per city by month (I am assuming this is the same as point 4/point 2)
 avg_by_month = num_stations_per_month.values[:,2]/unique_cities_per_month.values[:,2]
@@ -151,3 +155,24 @@ plt.legend().remove()
 plt.savefig(os.getcwd() + '/plots/Results/avg_numstations_by_month.png')
 plt.close()
 
+# 7. Number of cities with 1,2,3,4,5-10,10-20,20+ stations by year (a table) 
+df_1 = df.drop_duplicates(subset=['City','year'], keep='last')
+df_1['#stations/city'] = pd.cut(df_1['No. Stations'], [0, 1, 2, 3, 4, 10, 20, 50], labels=['1s', '2s', '3s', '4s',
+                                                                                          '5-10s', '10-20s', '20s+'])
+city_type_yearly_counts = df_1.groupby(['year','#stations/city'])['City'].nunique()
+city_type_yearly_counts = city_type_yearly_counts.reset_index()
+
+city_type_yearly_counts = city_type_yearly_counts.pivot_table(columns='#stations/city', index='year', values='City').reset_index()
+
+city_type_yearly_counts.to_csv(os.getcwd() + '/data/Results/city_type_yearly_counts.csv', index=False)
+
+# 8. Number of cities with 1,2,3,4,5-10,10-20,20+ stations by month (a table)
+df_1 = df.drop_duplicates(subset=['City','year','month'], keep='last')
+df_1['#stations/city'] = pd.cut(df_1['No. Stations'], [0, 1, 2, 3, 4, 10, 20, 50], labels=['1s', '2s', '3s', '4s',
+                                                                                          '5-10s', '10-20s', '20s+'])
+city_type_monthly_counts = df_1.groupby(['year','month', '#stations/city'])['City'].nunique()
+city_type_monthly_counts = city_type_monthly_counts.reset_index()
+#city_type_monthly_counts['date'] = city_type_monthly_counts['year'].astype(str) + '-' + city_type_monthly_counts['month'].astype(str)
+
+city_type_monthly_counts = city_type_monthly_counts.pivot_table(columns='#stations/city', index=['year','month'], values='City').reset_index()
+city_type_monthly_counts.to_csv(os.getcwd() + '/data/Results/city_type_monthly_counts.csv', index=False)
