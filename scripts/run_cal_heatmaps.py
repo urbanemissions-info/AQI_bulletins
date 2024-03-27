@@ -15,7 +15,7 @@ cities = [city for city in cities if city not in done_cities]
 
 print(cities)
 
-for city in tqdm(cities[1:]):
+for city in tqdm(cities):
     print(city)
     print('*** ------------------------------------------- ***')
     command = ["python", "scripts/cal_heatmaps.py", city]

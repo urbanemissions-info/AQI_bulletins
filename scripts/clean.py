@@ -46,7 +46,11 @@ master_df['City'] = master_df['City'].replace('vellore', 'Vellore', regex=True)
 master_df['City'] = master_df['City'].replace('Tiruppur', 'Tirupur', regex=True)
 master_df['City'] = master_df['City'].replace('NOIDA', 'Noida', regex=True)
 master_df['City'] = master_df['City'].replace('Greater_Noida', 'Greater Noida', regex=True)
-#master_df['City'] = master_df['City'].replace('Aurangabad', 'Aurangabad(Maharashtra)', regex=True) - this replaces aurangabad in aurangabad (bihar) as well
+
+master_df['City'] = master_df['City'].replace('Asanol', 'Asansol', regex=True)
+master_df['City'] = master_df['City'].replace('Yamuna Nagar', 'Yamunanagar', regex=True)
+
+master_df['City'] = master_df['City'].replace('Aurangabad(Maharashtra)', 'Aurangabad', regex=True)
 
 master_df['City'] = master_df['City'].apply(lambda x: str(x).strip())
 
@@ -55,3 +59,5 @@ master_df = master_df.sort_values(by='date')
 master_df.to_csv(os.getcwd() + '/data/Processed/AllIndiaBulletins_Master0.csv', index=False)
 
 
+# List of cities
+master_df.City.value_counts().to_csv(os.getcwd() + '/data/Processed/Cities_list.csv')

@@ -16,8 +16,7 @@ df['year'] = df['date'].dt.year
 df['month'] = df['date'].dt.month
 df['day365'] = df['date'].dt.dayofyear
 
-# List of cities
-df.City.value_counts().to_csv(os.getcwd() + '/data/Results/Cities_list.csv')
+df.City.value_counts().to_csv(os.getcwd() + '/data/Processed/Cities_list.csv')
 
 
 # 1. total unique cities being monitored by year 
