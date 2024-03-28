@@ -58,7 +58,6 @@ df['No. Stations'] = df['No. Stations'].astype(float)
 result = df.groupby(df.date.dt.year)['No. Stations'].mean().reset_index()
 num_years = result.date.nunique()
 #print(result)
-#df = df[df.date.dt.year == 2020]
 df.set_index('date', inplace=True)
 
 # Replace all NULLS with -1 (grey out on map)
@@ -70,9 +69,6 @@ aqi_ranges = [0, 50, 100, 200, 300, 400, 500]
 aqi_colors = ['#eeeeeeff', # Null values are replaced with -1 - this color is for that - remove it if null calendary years are not needed
               '#274e13ff', '#93c47dff', '#f2f542', '#f59042', '#ff0000', '#753b3b']
 
-# Create a custom discrete colormap for AQI
-cmap = ListedColormap(aqi_colors)
-norsm = BoundaryNorm(aqi_ranges, cmap.N, clip=True)
 
 # Define the conditions for each category
 conditions = [
@@ -89,7 +85,15 @@ categories = [1, 2, 3, 4, 5, 6, 7] #Should be 6 - +1 for the null value category
 df['AQI'] = np.select(conditions, categories, default='outlier')
 df['AQI'] = df['AQI'].astype(int)
 
-df.to_csv('Pune.csv')
+aqi_colors = [aqi_colors[i-1] for i in sorted(df['AQI'].unique())]
+#print(sorted(df['AQI'].unique()))
+#print(aqi_colors)
+# Create a custom discrete colormap for AQI
+cmap = ListedColormap(aqi_colors)
+#norsm = BoundaryNorm(aqi_ranges, cmap.N, clip=True)
+
+
+df.to_csv('Mangalore.csv')
 if len(city) < 12:
     title_font_size = 40
 else:

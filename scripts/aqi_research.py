@@ -17,8 +17,9 @@ df['month'] = df['date'].dt.month
 df['day365'] = df['date'].dt.dayofyear
 
 df.City.value_counts().to_csv(os.getcwd() + '/data/Processed/Cities_list.csv')
-
-
+# for city in df.City.unique():
+#     df[df.City==city].to_csv(os.getcwd() + '/data/Processed/Citywise/{}_AQIBulletins.csv'.format(city), index=False)
+# exit()
 # 1. total unique cities being monitored by year 
 unique_cities_per_year = df.groupby('year')['City'].nunique()
 unique_cities_per_year.to_csv(os.getcwd() + '/data/Results/unique_cities_per_year.csv')
